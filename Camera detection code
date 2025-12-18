@@ -1,0 +1,84 @@
+import cv2
+import numpy as np
+from collections import deque
+import serial
+import time
+
+cap = cv2.VideoCapture(0)
+if not cap.isOpened():
+    raise SystemExit("Could not open webcam")
+
+history = deque(maxlen=5)
+
+# Start communication with Arduino
+arduino = serial.Serial(port='COM3', baudrate=9600, timeout=1)
+time.sleep(2)  # wait for Arduino reset
+print("Connected to Arduino on", arduino.port)
+
+dx, dy = 0, 0  # default values if no ball is detected
+last_print = time.time()  # timer for throttling prints
+
+while True:
+    ok, frame = cap.read()
+    if not ok:
+        continue
+
+    frame = cv2.resize(frame, (640, 480))
+    h, w = frame.shape[:2]
+    cx, cy = w // 2, h // 2
+
+    cv2.circle(frame, (cx, cy), 5, (255, 255, 255), -1)  # draw center dot
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Broader yellow-green range (better under warm/orange lights)
+    lower = np.array([20, 70, 70])
+    upper = np.array([85, 255, 255])
+
+    mask = cv2.inRange(hsv, lower, upper)
+    mask = cv2.medianBlur(mask, 5)
+
+    cnts, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if cnts:
+        c = max(cnts, key=cv2.contourArea)
+        if cv2.contourArea(c) > 500:
+            (x, y), r = cv2.minEnclosingCircle(c)
+
+            history.append((x, y, r))
+            sx = int(sum(p[0] for p in history) / len(history))
+            sy = int(sum(p[1] for p in history) / len(history))
+            sr = int(sum(p[2] for p in history) / len(history))
+
+            # draw ball
+            cv2.circle(frame, (sx, sy), sr, (0, 255, 0), 2)
+            cv2.circle(frame, (sx, sy), 4, (0, 0, 255), -1)
+
+            # relative position
+            dx, dy = sx - cx, sy - cy
+
+            cv2.putText(frame, f"dx,dy=({dx},{dy})", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+    else:
+        dx, dy = 0, 0  # reset if no ball detected
+
+    # === Send to Arduino ===
+    arduino.write(f"{dx},{dy}\n".encode())
+    
+    data = arduino.readline().decode().strip()
+
+    #Only print every 0.5 seconds
+    if time.time() - last_print > 0.5:
+        if data:
+            print("Arduino:", data)
+        print(f"Rel pos (dx, dy): ({dx}, {dy})")
+        last_print = time.time()
+
+    cv2.imshow("Webcam tracking", frame)
+    cv2.imshow("Mask", mask)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+arduino.close()
