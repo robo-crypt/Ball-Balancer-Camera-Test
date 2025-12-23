@@ -82,7 +82,3 @@ This test focuses on validating:
 
 ## 📷 Demo
 
-> _Laptop camera detects ball position and drives platform tilt (ball not yet on platform)._
-
-```html
-<img src="images/camera_control_test.jpg" width="600">
