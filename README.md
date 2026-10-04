@@ -1,39 +1,44 @@
 # 🎯 Computer-Vision Ball Balancer
 
-This is a **vision-based autonomous version** of the ball balancer.  
-A **laptop camera** is used in this phase to **validate the computer vision system and control loop** before moving to the final embedded camera hardware.
+This project uses **computer vision and PID control** to balance a ball on a three-servo platform. A laptop webcam provides real-time position feedback during testing.
 
 ---
 
-### 🎥 Vision-Based Control Test
+### 🎥 PID Control Test
 
-This video demonstrates the ball balancer operating using **real-time camera feedback** from a laptop webcam.  
-The camera tracks the ball position and the controller adjusts the servos in real time to keep the ball centered.
+The latest video shows the ball balancer operating with **PID control and camera feedback**. The camera tracks the ball, and the controller adjusts the platform tilt to move it toward the center.
 
-https://github.com/user-attachments/assets/05046abd-455c-4f7d-9ce4-ba65d60c6b68
+The **PID gains are still being tuned**, so the ball oscillates around the target instead of settling at the center.
+
+
+
+
+
+https://github.com/user-attachments/assets/fbc106a1-0599-4341-8e76-213eed42b2fa
+
+
+
+
 
 ---
 
 ## ✨ Features
-- Real-time ball tracking using computer vision  
-- Closed-loop feedback control for autonomous stabilization  
-- 3-servo platform with synchronized motion  
-- Laptop camera used for rapid vision testing  
-- SolidWorks CAD models of the platform and linkages  
+- Real-time ball tracking using OpenCV
+- Closed-loop PID control using ball-position feedback
+- Three-servo platform for tilt adjustment
+- Laptop webcam for vision and control testing
+- SolidWorks CAD models of the platform and linkages
 
 ---
 
 ## 🛠️ Tools & Technologies
-- **SolidWorks** – CAD modeling and design  
-- **Laptop camera** – vision input for testing  
-- **OpenCV (Python/C++)** – ball detection and tracking  
-- **Arduino IDE (C++)** – servo control  
-- **Git/GitHub** – version control and documentation  
+- **SolidWorks** – mechanical design and CAD modeling
+- **Laptop webcam** – real-time vision input
+- **OpenCV** – ball detection and tracking
+- **Arduino IDE / C++** – PID implementation and servo control
+- **Git/GitHub** – version control and documentation
 
 ---
 
-## 🚀 Next Steps
-- Move vision processing to **ESP32-CAM**  
-- Implement **PID control** for smoother stabilization  
-- Improve **tracking accuracy and latency**  
-- Refine CAD models for smoother and more reliable operation  
+## 🚀 Next Step
+- Tune the **PID gains** to reduce oscillation and improve how the ball settles at the center.
